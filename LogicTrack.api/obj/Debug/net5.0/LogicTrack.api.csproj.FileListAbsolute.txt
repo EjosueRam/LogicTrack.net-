@@ -1,0 +1,7 @@
+C:\Users\Lenovo\Documents\GitHub\LogicTrack.net\LogicTrack.api\obj\Debug\net5.0\LogicTrack.api.csproj.AssemblyReference.cache
+C:\Users\Lenovo\Documents\GitHub\LogicTrack.net\LogicTrack.api\obj\Debug\net5.0\LogicTrack.api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Lenovo\Documents\GitHub\LogicTrack.net\LogicTrack.api\obj\Debug\net5.0\LogicTrack.api.AssemblyInfoInputs.cache
+C:\Users\Lenovo\Documents\GitHub\LogicTrack.net\LogicTrack.api\obj\Debug\net5.0\LogicTrack.api.AssemblyInfo.cs
+C:\Users\Lenovo\Documents\GitHub\LogicTrack.net\LogicTrack.api\obj\Debug\net5.0\LogicTrack.api.csproj.CoreCompileInputs.cache
+C:\Users\Lenovo\Documents\GitHub\LogicTrack.net\LogicTrack.api\obj\Debug\net5.0\LogicTrack.api.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Lenovo\Documents\GitHub\LogicTrack.net\LogicTrack.api\obj\Debug\net5.0\LogicTrack.api.MvcApplicationPartsAssemblyInfo.cache
