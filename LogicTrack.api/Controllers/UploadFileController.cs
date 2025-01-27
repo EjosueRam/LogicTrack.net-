@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using Microsoft.AspNetCore.Http;
 using LogicTrack.api.Data;
-using LogicTrack.api.Models;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using System.IO;
+using NPOI.HSSF.UserModel;
+using System.Collections.Generic;
 
 namespace LogicTrack.api.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/v1/[controller]")]
     public class UploadFileController : ControllerBase
     {
         private readonly LogicTrackContext _context;
@@ -19,55 +21,56 @@ namespace LogicTrack.api.Controllers
             _context = context;
         }
 
-        // GET: api/v1/HUInternal
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UploadFile>>> GetHuInternal()
-        {
-            return await _context.UploadFile.ToListAsync();
-        }
-
-        // POST: api/v1/HUInternal
         [HttpPost]
-        public async Task<ActionResult> PostHuInternal([FromBody] List<UploadFile> huInternals)
+        public async Task<IActionResult> UploadFile([FromForm] IFormFile file)
         {
-            if (huInternals == null || !huInternals.Any())
+            if (file == null || file.Length == 0)
             {
-                return BadRequest(new { error = "Invalid data format" });
+                return BadRequest(new { error = "No file provided" });
             }
 
-            _context.UploadFile.AddRange(huInternals);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetHuInternal), new { message = "HUInternals guardados con éxito" });
-        }
-
-        // PUT: api/v1/HUInternal
-        [HttpPut]
-        public async Task<ActionResult> PutHuInternal([FromBody] List<UploadFile> huInternals)
-        {
-            if (huInternals == null || !huInternals.Any())
+            try
             {
-                return BadRequest(new { error = "Invalid data format" });
-            }
-
-            var notFound = new List<string>();
-            foreach (var huInternal in huInternals)
-            {
-                var hu = await _context.UploadFile.FirstOrDefaultAsync(h => h.HuInternalValue == huInternal.HuInternalValue);
-                if (hu != null)
+                using (var stream = new MemoryStream())
                 {
-                    hu.Status = huInternal.Status;
-                }
-                else
-                {
-                    notFound.Add(huInternal.HuInternalValue);
-                }
+                    await file.CopyToAsync(stream);
+                    stream.Position = 0;
+                    HSSFWorkbook workbook = new HSSFWorkbook(stream);
+                    var sheet = workbook.GetSheet("2a REVISIONE");
+                    if (sheet == null)
+                        {
+                            return BadRequest(new { error = "Sheet '2a REVISIONE' not found" });
+                        }
+                    
+                        var huInternals = new List<string>();
+                        for (int row = 2; row <= sheet.LastRowNum; row++)
+                        {
+                            var currentRow = sheet.GetRow(row);
+                            if (currentRow != null)
+                            {
+                                var huInternal = currentRow.GetCell(0)?.ToString().Trim();
+                                if (!string.IsNullOrEmpty(huInternal))
+                                {
+                                    huInternals.Add(huInternal);
+                                    var scanData = await _context.ScanData.FirstOrDefaultAsync(s => s.Hu == huInternal);
+                                    if (scanData != null)
+                                    {
+                                        scanData.Motivo = "apartado";
+                                        scanData.Motivo = "almacen temporal ";
+                                    }
+                                        
+                                }
+                            }
+                        }
+
+                        await _context.SaveChangesAsync();
+                        return Ok(new { message = "Archivo procesado con éxito", huInternals });
+                    }
             }
-
-            await _context.SaveChangesAsync();
-
-            var updatedHuInternals = await _context.UploadFile.ToListAsync();
-            return Ok(new { huInternals = updatedHuInternals, not_found = notFound });
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Error processing file", details = ex.Message });
+            }
         }
     }
 }
