@@ -65,7 +65,7 @@ const FileUploadPage = ({ scannedHuInternals = [] }) => {
             <DataTable
                 data={huInternalsState}
                 columns={[
-                    { title: 'HU', data: 'hu_internal' },
+                    { title: 'HU', data: 'huInternal' },
                     {
                         title: 'Estado',
                         data: 'status',
